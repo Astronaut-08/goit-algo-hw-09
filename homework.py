@@ -9,4 +9,44 @@
 із номіналами монет та їх кількістю для досягнення заданої суми найефективнішим способом. Наприклад, для суми
 113 це буде словник {1: 1, 2: 1, 10: 1, 50: 2}'''
 
+need_to_get_back = 113 # задаємо скільки решти треба повернути
 
+def find_coins_greedy(amount: int) -> dict:
+    '''Жадібно розраховуємо кількість монет що потрібно повернути'''
+    coins = [50, 25, 10, 5, 2, 1] # задаємо щоб було від більшого до меншого (додатково можна включити сортування)
+    get_back = dict()
+    
+    for coin in coins: # ми просто починаючи від більшого зменшуємо суму доки не досягнемо 0
+        need = amount // coin
+        if need > 0:
+            get_back[coin] = need
+            amount -= coin * need
+
+    return get_back
+
+def find_min_coins(amount: int) -> dict:
+    '''Динамічно обраховуємо найменшу кількість потрібних монет'''
+    coins = [1, 2, 5, 10, 25, 50]
+
+    # Створюємо нашу таблицю, в якій записуватимемео на кожну суму, кількість необхідних монет по черзі
+    table = [float('inf')] * (amount + 1)
+    table[0] = 0 # починаємо з 0 бо щоб зібрати суму 0 треба 0 монет
+    
+    choise = [0] * (amount + 1) # потрібно для треку
+
+    for coin in coins: # для кожної монети записуємо і оновлюємо дані в table та choise
+        for s in range(coin, amount + 1): # починаємо від номіналу coin бо нема сенсу змінювати щось до його номіналу
+            if table[s - coin] + 1 < table[s]: # чи нове значення менше від поточного в таблиці, якщо так, оновлюємо
+                table[s] = table[s - coin] + 1
+                choise[s] = coin # відслідковуємо які монети ми обрали
+
+    get_back = dict()
+    while amount > 0:
+        coin = choise[amount] # беремо монету яку взяли останньою
+        get_back[coin] = get_back.get(coin, 0) + 1 # якщо не існує починаємо з 0
+        amount -= coin 
+
+    return get_back
+
+print(find_coins_greedy(need_to_get_back))
+print(find_min_coins(need_to_get_back))
